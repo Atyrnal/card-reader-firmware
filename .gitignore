@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+include/secrets.hpp
+.pio/
+build/
+.vscode/
