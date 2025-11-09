@@ -20,13 +20,11 @@
 
 #include <Arduino.h>
 #include "PN5180iClass.h"
-#include "Debug.h"
 
 PN5180iClass::PN5180iClass(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin) : PN5180(SSpin, BUSYpin, RSTpin) {
 }
 
 iClassErrorCode PN5180iClass::ActivateAll() {
-  PN5180DEBUG(F("Activate All...\n"));
 
   // Disable CRCs
   writeRegister(CRC_TX_CONFIG, 0x00000000);
@@ -44,7 +42,6 @@ iClassErrorCode PN5180iClass::ActivateAll() {
 }
 
 iClassErrorCode PN5180iClass::Identify(uint8_t *csn) {
-  PN5180DEBUG(F("Identify...\n"));
 
   writeRegister(CRC_TX_CONFIG, 0x00000000);
   writeRegister(CRC_RX_CONFIG, 0x00000029);
@@ -71,7 +68,6 @@ iClassErrorCode PN5180iClass::Identify(uint8_t *csn) {
 
 
 iClassErrorCode PN5180iClass::Select(uint8_t *csn) {
-  PN5180DEBUG(F("Select...\n"));
 
   writeRegister(CRC_TX_CONFIG, 0x00000000);
   writeRegister(CRC_RX_CONFIG, 0x00000029);
@@ -97,7 +93,6 @@ iClassErrorCode PN5180iClass::Select(uint8_t *csn) {
 }
 
 iClassErrorCode PN5180iClass::ReadCheck(uint8_t *ccnr) {
-  PN5180DEBUG(F("ReadCheck...\n"));
 
   // Disable CRCs
   writeRegister(CRC_TX_CONFIG, 0x00000000);
@@ -119,7 +114,6 @@ iClassErrorCode PN5180iClass::ReadCheck(uint8_t *ccnr) {
 }
 
 iClassErrorCode PN5180iClass::Check(uint8_t *mac) {
-  PN5180DEBUG(F("Check...\n"));
 
   // Disable CRCs
   writeRegister(CRC_TX_CONFIG, 0x00000000);
@@ -142,7 +136,6 @@ iClassErrorCode PN5180iClass::Check(uint8_t *mac) {
 }
 
 iClassErrorCode PN5180iClass::Read(uint8_t blockNum, uint8_t *blockData) {
-  PN5180DEBUG(F("Read...\n"));
 
   writeRegister(CRC_TX_CONFIG, 0x00000069);
   writeRegister(CRC_RX_CONFIG, 0x00000029);
@@ -163,7 +156,6 @@ iClassErrorCode PN5180iClass::Read(uint8_t blockNum, uint8_t *blockData) {
 }
 
 iClassErrorCode PN5180iClass::Halt() {
-  PN5180DEBUG(F("Halt...\n"));
 
   // Disable CRCs
   writeRegister(CRC_TX_CONFIG, 0x00000000);
@@ -197,18 +189,11 @@ iClassErrorCode PN5180iClass::issueiClassCommand(uint8_t *cmd, uint8_t cmdLen, u
   uint32_t rxStatus;
   readRegister(RX_STATUS, &rxStatus);
 
-  PN5180DEBUG(F("RX-Status="));
-  PN5180DEBUG(formatHex(rxStatus));
-
   uint16_t len = (uint16_t)(rxStatus & 0x000001ff);
 
-  PN5180DEBUG(", len=");
-  PN5180DEBUG(len);
-  PN5180DEBUG("\n");
 
  *resultPtr = readData(len);
   if (0L == *resultPtr) {
-    PN5180DEBUG(F("*** ERROR in readData!\n"));
     return ICLASS_EC_UNKNOWN_ERROR;
   }
 
@@ -237,18 +222,11 @@ iClassErrorCode PN5180iClass::issueiClassCommand(uint8_t *cmd, uint8_t cmdLen, u
   if (responseFlags & (1<<0)) { // error flag
     uint8_t errorCode = (*resultPtr)[1];
 
-    PN5180DEBUG("ERROR code=");
-    PN5180DEBUG(formatHex(errorCode));
-    PN5180DEBUG(" - ");
-    PN5180DEBUG(strerror(errorCode));
-    PN5180DEBUG("\n");
-
     return (iClassErrorCode)errorCode;
   }
 
 #ifdef DEBUG
   if (responseFlags & (1<<3)) { // extendsion flag
-    PN5180DEBUG("Extension flag is set!\n");
   }
 #endif
 
@@ -257,15 +235,11 @@ iClassErrorCode PN5180iClass::issueiClassCommand(uint8_t *cmd, uint8_t cmdLen, u
 }
 
 bool PN5180iClass::setupRF() {
-  PN5180DEBUG(F("Loading RF-Configuration...\n"));
   if (loadRFConfig(0x0d, 0x8d)) {  // ISO15693 parameters
-    PN5180DEBUG(F("done.\n"));
   }
   else return false;
 
-  PN5180DEBUG(F("Turning ON RF field...\n"));
   if (setRF_on()) {
-    PN5180DEBUG(F("done.\n"));
   }
   else return false;
 
@@ -276,9 +250,6 @@ bool PN5180iClass::setupRF() {
 }
 
 const __FlashStringHelper *PN5180iClass::strerror(iClassErrorCode errno) {
-  PN5180DEBUG(F("iClassErrorCode="));
-  PN5180DEBUG(errno);
-  PN5180DEBUG("\n");
 
   switch (errno) {
     case EC_NO_CARD: return F("No card detected!");
