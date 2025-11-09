@@ -143,7 +143,7 @@ void loop() {
       last_detected = psID;
       time_t now;
       time(&now);
-      if (match && difftime(now, last_scan_time) > 5.0 && (last_scan != psID || difftime(now, last_scan_time) > 15.0)) {
+      if (match && difftime(now, last_scan_time) > 2.0 && (last_scan != psID || difftime(now, last_scan_time) > 5.0)) {
         last_scan = psID;
         time(&last_scan_time);
         on_scan(psID); 
